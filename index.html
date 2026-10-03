@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LUCH AI // CONSOLE</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* ========== CSS ПЕРЕМЕННЫЕ ========== */
+        :root {
+            --bg-deep: #05050d;
+            --bg-panel: #0a0b18;
+            --bg-card: #0d0e1f;
+            --bg-input: #0c0d1c;
+            --neon-green: #00ff41;
+            --neon-cyan: #00e5ff;
+            --neon-red: #ff1744;
+            --text-primary: #c8ccd4;
+            --text-secondary: #8890a0;
+            --text-bright: #e8eaef;
+            --text-dim: #5a6070;
+            --border-subtle: rgba(255, 255, 255, 0.04);
+            --border-glow-green: rgba(0, 255, 65, 0.25);
+            --border-glow-cyan: rgba(0, 229, 255, 0.25);
+            --border-glow-red: rgba(255, 23, 68, 0.4);
+            --glass-bg: rgba(10, 11, 24, 0.75);
+            --shadow-glow-green: 0 0 20px rgba(0, 255, 65, 0.12);
+            --shadow-glow-cyan: 0 0 20px rgba(0, 229, 255, 0.12);
+            --shadow-glow-red: 0 0 24px rgba(255, 23, 68, 0.3);
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+            --font-display: 'Orbitron', 'JetBrains Mono', sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            height: 100%;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            height: 100%;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            font-family: var(--font-mono);
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            overflow: hidden;
+            position: relative;
+            user-select: none;
+            letter-spacing: 0.02em;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(0, 255, 65, 0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.018) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 70%);
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 3px,
+                    rgba(0, 0, 0, 0.025) 3px,
+                    rgba(0, 0, 0, 0.025) 6px);
+            opacity: 0.5;
+        }
+
+        .vignette-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            background: radial-gradient(ellipse at center, transparent 55%, rgba(5, 5, 13, 0.7) 100%);
+            opacity: 0.85;
+        }
+
+        .header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--border-subtle);
+            backdrop-filter: blur(20px);
+            flex-shrink: 0;
+            gap: 12px;
+            box-shadow: 0 1px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--text-bright);
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+
+        .logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            font-size: 1.1rem;
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            color: var(--neon-green);
+            text-shadow: 0 0 12px rgba(0, 255, 65, 0.5);
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--neon-green);
+            box-shadow: 0 0 8px var(--neon-green);
+            flex-shrink: 0;
+        }
+
+        .chat-container {
+            position: relative;
+            z-index: 5;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(0, 229, 255, 0.02) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(0, 255, 65, 0.015) 0%, transparent 50%);
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 8px 0;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 65, 0.2);
+        }
+        .chat-container {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 255, 65, 0.2) transparent;
+        }
+
+        .message {
+            position: relative;
+            max-width: 82%;
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            line-height: 1.55;
+            letter-spacing: 0.03em;
+            word-break: break-word;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow-green);
+            border-left: 3px solid var(--neon-green);
+            color: var(--text-bright);
+            box-shadow: var(--shadow-glow-green);
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow-cyan);
+            border-right: 3px solid var(--neon-cyan);
+            color: var(--text-bright);
+            box-shadow: var(--shadow-glow-cyan);
+            text-align: right;
+        }
+
+        .message.system {
+            align-self: center;
+            max-width: 90%;
+            background: rgba(15, 16, 30, 0.6);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            text-align: center;
+            padding: 8px 18px;
+            font-style: italic;
+        }
+
+        .play-audio-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 8px 16px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            color: var(--neon-green);
+            background: rgba(0, 255, 65, 0.06);
+            border: 1px solid rgba(0, 255, 65, 0.35);
+            cursor: pointer;
+            text-transform: uppercase;
+            white-space: nowrap;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.08);
+        }
+        .play-audio-btn:hover {
+            background: rgba(0, 255, 65, 0.14);
+            border-color: rgba(0, 255, 65, 0.6);
+            color: #fff;
+        }
+        .play-audio-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .input-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--glass-bg);
+            border-top: 1px solid var(--border-subtle);
+            backdrop-filter: blur(20px);
+            flex-shrink: 0;
+            box-shadow: 0 -1px 30px rgba(0, 0, 0, 0.4);
+            padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border-subtle);
+            cursor: pointer;
+            font-size: 1.1rem;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            touch-action: manipulation;
+            transition: all 0.15s ease;
+        }
+        .btn:active {
+            transform: scale(0.92);
+        }
+
+        .btn-mic {
+            background: var(--bg-card);
+            border-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            box-shadow: 0 0 0 rgba(255, 23, 68, 0);
+        }
+        .btn-mic:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-bright);
+        }
+        .btn-mic.active {
+            background: rgba(255, 23, 68, 0.15);
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+            box-shadow: var(--shadow-glow-red);
+        }
+
+        .btn-send {
+            background: rgba(0, 229, 255, 0.08);
+            border-color: rgba(0, 229, 255, 0.3);
+            color: var(--neon-cyan);
+            font-size: 1rem;
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.12);
+        }
+        .btn-send:hover {
+            background: rgba(0, 229, 255, 0.16);
+            border-color: rgba(0, 229, 255, 0.55);
+            color: #fff;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            padding: 0 14px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .input-wrapper:focus-within {
+            border-color: rgba(0, 229, 255, 0.45);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 18px rgba(0, 229, 255, 0.12);
+        }
+        .input-icon {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+        .input-wrapper:focus-within .input-icon {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+        }
+
+        #userInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-bright);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 12px 0;
+            letter-spacing: 0.03em;
+            min-width: 0;
+            caret-color: var(--neon-cyan);
+        }
+        #userInput::placeholder {
+            color: var(--text-dim);
+            letter-spacing: 0.04em;
+            font-style: italic;
+            opacity: 0.7;
+        }
+        #userInput:-webkit-autofill,
+        #userInput:-webkit-autofill:hover,
+        #userInput:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--text-bright);
+            -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset;
+        }
+
+        #audioPlayer {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 10px 14px;
+            }
+            .header-brand {
+                font-size: 0.72rem;
+                gap: 6px;
+            }
+            .logo-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+            }
+            .header-status {
+                font-size: 0.62rem;
+                gap: 5px;
+            }
+            .status-dot {
+                width: 6px;
+                height: 6px;
+            }
+            .chat-container {
+                padding: 14px 10px;
+                gap: 10px;
+            }
+            .message {
+                max-width: 90%;
+                font-size: 0.76rem;
+                padding: 10px 13px;
+            }
+            .input-container {
+                padding: 10px 10px;
+                gap: 7px;
+                padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+            }
+            .btn {
+                width: 38px;
+                height: 38px;
+                font-size: 1rem;
+            }
+            .btn-mic,
+            .btn-send {
+                width: 38px;
+                height: 38px;
+            }
+            .input-wrapper {
+                padding: 0 10px;
+                gap: 5px;
+            }
+            #userInput {
+                font-size: 0.78rem;
+                padding: 10px 0;
+            }
+            .play-audio-btn {
+                font-size: 0.65rem;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .header {
+                padding: 8px 10px;
+                gap: 6px;
+            }
+            .header-brand {
+                font-size: 0.65rem;
+                gap: 4px;
+                letter-spacing: 0.04em;
+            }
+            .logo-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 0.75rem;
+            }
+            .btn {
+                width: 34px;
+                height: 34px;
+                font-size: 0.9rem;
+            }
+            .btn-mic,
+            .btn-send {
+                width: 34px;
+                height: 34px;
+            }
+            .input-wrapper {
+                padding: 0 8px;
+            }
+            #userInput {
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="vignette-overlay"></div>
+
+    <header class="header">
+        <div class="header-brand">
+            <span class="logo-icon">⚡</span>
+            <span><strong>LUCH AI</strong> // TERMINAL</span>
+        </div>
+        <div class="header-status">
+            <span class="status-dot"></span>
+            ONLINE
+        </div>
+    </header>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="message ai">
+            Система готова.<br>Нажмите <span style="color:var(--neon-green);font-weight:600;">🎙</span> для активации фонового микрофона.
+        </div>
+    </div>
+
+    <div class="input-container">
+        <button class="btn btn-mic" id="micToggle" onclick="toggleAlwaysListening()" title="Включить/выключить микрофон">
+            🎙
+        </button>
+
+        <div class="input-wrapper">
+            <span class="input-icon">⌨</span>
+            <input type="text" id="userInput" placeholder="Введите команду или вопрос..." autocomplete="off" onkeypress="handleKey(event)">
+        </div>
+
+        <button class="btn btn-send" id="sendBtn" onclick="sendMessage()" title="Отправить">
+            ➤
+        </button>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        // ----- DOM refs -----
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const micToggle = document.getElementById('micToggle');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // ----- State -----
+        let isStreaming = false;
+        let audioContext, analyser, microphone, stream;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let silenceTimer = null;
+        let isSpeaking = false;
+        let isProcessingAI = false;
+        let isAudioPlaying = false;
+
+        // ---- VAD parameters ----
+        const THRESHOLD = 8;
+        const SILENCE_TIMEOUT = 300;
+
+        // ---- Last messages for update ----
+        let lastUserMsg = null;
+        let lastAIMsg = null;
+
+        // ----- Helpers -----
+        function addMessage(text, sender, extraClass = '') {
+            const msg = document.createElement('div');
+            msg.className = `message ${sender} ${extraClass}`;
+            msg.innerText = text;
+            chatContainer.appendChild(msg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return msg;
+        }
+
+        // ----- Stop audio (озвучки) - вызывается только по стоп-слову -----
+        function stopAudio() {
+            if (!audioPlayer.paused) {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+                isAudioPlaying = false;
+                document.querySelectorAll('.play-audio-btn').forEach(btn => {
+                    btn.innerHTML = '🔊 ПРОСЛУШАТЬ ОТВЕТ';
+                });
+                console.log('Озвучка остановлена по стоп-слову');
+            }
+        }
+
+        // ----- Microphone Toggle -----
+        async function toggleAlwaysListening() {
+            if (!isStreaming) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                    if (audioContext.state === 'suspended') await audioContext.resume();
+
+                    microphone = audioContext.createMediaStreamSource(stream);
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 512;
+                    microphone.connect(analyser);
+
+                    isStreaming = true;
+                    micToggle.classList.add('active');
+                    micToggle.innerText = '⏺';
+
+                    startVADListener();
+                } catch (err) {
+                    alert('Ошибка доступа к микрофону: ' + err.message);
+                }
+            } else {
+                isStreaming = false;
+                micToggle.classList.remove('active');
+                micToggle.innerText = '🎙';
+                clearTimeout(silenceTimer);
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                if (audioContext) audioContext.close();
+            }
+        }
+
+        // ----- VAD (RMS) -----
+        function startVADListener() {
+            if (!isStreaming) return;
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+            function analyze() {
+                if (!isStreaming) return;
+                analyser.getByteFrequencyData(dataArray);
+
+                let sumSquares = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    const val = dataArray[i];
+                    sumSquares += val * val;
+                }
+                const rms = Math.sqrt(sumSquares / dataArray.length);
+
+                if (rms > THRESHOLD && !isProcessingAI) {
+                    if (!isSpeaking) {
+                        isSpeaking = true;
+                        startChunkRecording();
+                    }
+                    clearTimeout(silenceTimer);
+                    silenceTimer = setTimeout(() => {
+                        if (isSpeaking) {
+                            isSpeaking = false;
+                            stopAndSendChunk();
+                        }
+                    }, SILENCE_TIMEOUT);
+                }
+                requestAnimationFrame(analyze);
+            }
+            analyze();
+        }
+
+        function startChunkRecording() {
+            try {
+                let options = {};
+                if (MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/webm' };
+                else if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
+
+                mediaRecorder = new MediaRecorder(stream, options);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.start();
+            } catch (e) {
+                console.error('Ошибка записи:', e);
+            }
+        }
+
+        function stopAndSendChunk() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.onstop = async () => {
+                    if (audioChunks.length > 0) {
+                        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                        await transmitAudioToServer(blob);
+                    }
+                };
+                mediaRecorder.stop();
+            }
+        }
+
+        // ----- Transmit audio (с обновлением существующих сообщений) -----
+        async function transmitAudioToServer(blob) {
+            if (isProcessingAI) return;
+            isProcessingAI = true;
+
+            if (!lastUserMsg || lastUserMsg.className.indexOf('user') === -1) {
+                lastUserMsg = addMessage('[ АУДИОПОТОК ПЕРЕДАН ]', 'user');
+            } else {
+                lastUserMsg.innerText = '[ АУДИОПОТОК ПЕРЕДАН ]';
+            }
+
+            if (!lastAIMsg || lastAIMsg.className.indexOf('ai') === -1) {
+                lastAIMsg = addMessage('Обработка биометрии и команд...', 'ai');
+            } else {
+                lastAIMsg.innerText = 'Обработка биометрии и команд...';
+            }
+
+            const formData = new FormData();
+            formData.append('file', blob, 'stream_audio.webm');
+
+            try {
+                const res = await fetch('/api/voice', { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('Сбой сервера');
+                const data = await res.json();
+
+                // Стоп-слово
+                if (data.status === 'stop_audio') {
+                    stopAudio();
+                    if (lastUserMsg) lastUserMsg.remove();
+                    if (lastAIMsg) lastAIMsg.remove();
+                    lastUserMsg = null;
+                    lastAIMsg = null;
+                    return;
+                }
+
+                // Игнорирование (чужой голос или нет триггера)
+                if (data.status === 'ignored') {
+                    if (lastUserMsg) lastUserMsg.remove();
+                    if (lastAIMsg) lastAIMsg.remove();
+                    lastUserMsg = null;
+                    lastAIMsg = null;
+                    return;
+                }
+
+                // Нормальный ответ
+                lastUserMsg.innerText = '[ ГОЛОС ] : ' + data.user_text;
+                lastAIMsg.innerText = data.response;
+                if (data.play_audio) {
+                    appendPlayButton(lastAIMsg);
+                }
+            } catch (err) {
+                lastAIMsg.innerText = '⚠️ ОШИБКА СЕТИ: ' + err.message;
+            } finally {
+                isProcessingAI = false;
+                lastUserMsg = null;
+                lastAIMsg = null;
+            }
+        }
+
+        // ----- Play button (без автоматической остановки) -----
+        async function appendPlayButton(msgContainer) {
+            const btn = document.createElement('button');
+            btn.className = 'play-audio-btn';
+            btn.innerHTML = '⏳ ПОДГОТОВКА ЗВУКА...';
+            btn.disabled = true;
+
+            msgContainer.appendChild(document.createElement('br'));
+            msgContainer.appendChild(btn);
+            msgContainer.scrollIntoView({ block: 'nearest' });
+
+            try {
+                const res = await fetch('/api/audio?t=' + Date.now());
+                if (!res.ok) throw new Error('Audio fetch failed');
+                const blob = await res.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                audioPlayer.src = audioUrl;
+
+                btn.innerHTML = '🔊 ПРОСЛУШАТЬ ОТВЕТ';
+                btn.disabled = false;
+                btn.onclick = () => {
+                    if (!audioPlayer.paused) {
+                        audioPlayer.pause();
+                        audioPlayer.currentTime = 0;
+                        isAudioPlaying = false;
+                        btn.innerHTML = '🔊 ПРОСЛУШАТЬ ОТВЕТ';
+                        return;
+                    }
+                    audioPlayer.currentTime = 0;
+                    audioPlayer.play().catch(e => alert('Не удалось воспроизвести звук: ' + e.message));
+                    isAudioPlaying = true;
+                    btn.innerHTML = '⏸ ОСТАНОВИТЬ';
+                };
+
+                audioPlayer.play().then(() => {
+                    isAudioPlaying = true;
+                    btn.innerHTML = '⏸ ОСТАНОВИТЬ';
+                }).catch(() => console.log('Автозапуск заблокирован'));
+
+                audioPlayer.onended = () => {
+                    isAudioPlaying = false;
+                    document.querySelectorAll('.play-audio-btn').forEach(b => {
+                        b.innerHTML = '🔊 ПРОСЛУШАТЬ ОТВЕТ';
+                    });
+                };
+
+            } catch (err) {
+                btn.innerHTML = '⚠️ ОШИБКА ЗВУКА';
+                console.error('Audio error:', err);
+            }
+        }
+
+        // ----- Send text message (с поддержкой команд) -----
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Если команда (начинается с '/')
+            if (text.startsWith('/')) {
+                userInput.value = '';
+                const systemMsg = addMessage(`Выполняется: ${text}`, 'system');
+                try {
+                    const res = await fetch('/api/command', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ cmd: text })
+                    });
+                    const data = await res.json();
+                    systemMsg.innerText = data.output;
+                } catch (err) {
+                    systemMsg.innerText = '⚠️ Ошибка выполнения: ' + err.message;
+                }
+                return;
+            }
+
+            // Обычный запрос к ИИ
+            addMessage(text, 'user');
+            userInput.value = '';
+            isProcessingAI = true;
+
+            const aiMsg = addMessage('Обработка...', 'ai');
+
+            try {
+                const res = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                const data = await res.json();
+                aiMsg.innerText = data.response;
+                if (data.play_audio) {
+                    appendPlayButton(aiMsg);
+                }
+            } catch (err) {
+                aiMsg.innerText = '⚠️ СБОЙ: ' + err.message;
+            } finally {
+                isProcessingAI = false;
+            }
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        window.addEventListener('load', () => {
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>
